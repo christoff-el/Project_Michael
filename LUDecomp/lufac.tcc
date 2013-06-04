@@ -18,4 +18,4 @@ lufac(T *A, IndexType size, IndexType incR, IndexType incC)
 	}
 };
 
-#endif
+#endif	//LU_DECOMP_UNBL_TCC
