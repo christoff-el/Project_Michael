@@ -1,13 +1,21 @@
-#ifndef LU_DECOMP_TRSV_BLK_H
-#define LU_DECOMP_TRSV_BLK_H 1
+#ifndef LU_DECOMP_TRSV_PSX_H
+#define LU_DECOMP_TRSV_PSX_H 1
 
-#include "trsv_blk.tcc"
+#include "trsv_psx.tcc"
 
-/***** Triangular Solver where b is a matrix *****
-I.e. we solve Ax(:,i) = b(:,i) where i=0,...,#of cols of b -1
+/***** POSIX distributor for trsv_blk.h *****
 
-Implementation works bottom up, solving each system at the same time - should be most
-cache friendly wrt accessing x.
+Distributes workload of trsv_blk to multiple processors.
+
+Processor count and cache size should be defined by:
+#define NUMPROC
+#define CACHESIZE
+
+Defaults are: 
+NUMPROC = 4
+CACHESIZE = 32*1024
+
+Assumes double precision.
 
 ***** Input parameters: *****
 
@@ -77,9 +85,9 @@ ASSUMES ROW-MAJOR STORAGE
 
 template <typename IndexType, typename A, typename X>
 void
-trsv_blk(char uplo, char trans, char diag, IndexType n,
+trsv_psx(char uplo, char trans, char diag, IndexType n,
 		const A *a, IndexType lda,
 				X *x, IndexType ldx, 
 					IndexType m);
 
-#endif	//LU_DECOMP_TRSV_BLK_H
+#endif	//LU_DECOMP_TRSV_PSX_H
