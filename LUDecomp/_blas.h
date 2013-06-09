@@ -23,6 +23,5 @@ void
 ger(T *A, IndexType m, IndexType n, IndexType incM, IndexType incN, 
 	VEC *a, IndexType inca, VEC *b, IndexType incb, SCAL &alpha);
 
-
 #include "_blas.tcc"
 #endif

@@ -1,5 +1,5 @@
-#ifndef LU_DECOMP_UNBL_TCC
-#define LU_DECOMP_UNBL_TCC 1
+#ifndef LU_DECOMP_TCC
+#define LU_DECOMP_TCC 1
 #include "_blas.h"
 
 template <typename IndexType, typename T>

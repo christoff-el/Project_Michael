@@ -30,6 +30,21 @@ print_vector(double *x, int size, int incx)
 		cout << x[i_x] << endl;
 	}
 }
+
+// Norm
+double
+max_diff(double *A, double *B, int m, int n)
+{
+	double res = 0;
+	for (int i=0; i<m; ++i)
+	{
+		for (int j=0; j<n; ++j)
+		{
+			if (fabs(A[i*n+j]-B[i*n+j])>res) res = fabs(A[i*n+j]-B[i*n+j]); 
+		}
+	}
+	return res;
+}
 //+++++++++++++++++++++++++++
 
 
@@ -108,10 +123,18 @@ int main(int argc, char** argv)
 	A[6] = 3; A[7] = -9; A[8] = -3;*/
 	double *L = new double [N*N]; double *U = new double [N*N];
 	double *result = new double [N*N];
+	double *origin = new double [N*N];
 	cout << "Test LU: " << endl;
 	cout << "A= " << endl;
 	print_matrix(A, M, N, N, 1);
 	cout << endl;
+	for (int i=0; i<N; ++i)
+	{
+		for (int j=0; j<N; ++j)
+		{
+			origin[i*N+j] = A[i*N+j];
+		}
+	}
 	lufac(A, N, N, 1);
 	for (int i=0; i<N; ++i)
 	{
@@ -138,6 +161,8 @@ int main(int argc, char** argv)
 	hpc::dgemm(N,N,N,result,L,U,blocksize);
 	cout << "L*U= " << endl;
 	print_matrix(result, M, N, N, 1);
+	cout << "max error is:" << endl;
+	cout << max_diff(result, origin, N, N) << endl;
 	//+++++++++++++++++++++++++++
 
 	// Free memory
@@ -146,6 +171,7 @@ int main(int argc, char** argv)
 	delete[] y;
 	delete[] L;
 	delete[] U;
+	delete[] origin;
 	delete[] result;
 	return 0;
 }
