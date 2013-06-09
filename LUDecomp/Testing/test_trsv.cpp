@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 	
 	testTRSV(n);
 	testTRSV_BLK(n,m);
-	testTRSV_PSX(n,m);
+	//testTRSV_PSX(n,m);
 	
 	
 	return 0;
@@ -323,26 +323,45 @@ void testTRSV_BLK(int n, int m) {
 	//Solve using the solver:
 	int lda = n;
 	int ldx = m;
+	
+	for (int i=0; i<n; ++i) {
+		for (int j=0; j<n; ++j) {
+		
+			cout << A_U_D[i*lda+j] << " ";
+			
+		}
+		cout<<endl;
+	}
 
+	for (int i=0; i<n; ++i) {
+		for (int j=0; j<n; ++j) {
+		
+			cout << b_U_D[i*ldx+j] << " ";
+			
+		}
+		cout<<endl;
+	}
+	
 	//Upper:
-	trsv_blk('U', 'N', 'N', n, A_U, lda, b_U, ldx, m);
-	trsv_blk('U', 'T', 'N', n, A_U, lda, b_U_T, ldx, m);
-	trsv_blk('U', 'N', 'U', n, A_U_D, lda, b_U_D, ldx, m);
-	trsv_blk('U', 'T', 'U', n, A_U_D, lda, b_U_T_D, ldx, m);
+	trsv_blk('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
+	trsv_blk('U', 'T', 'N', 'A', n, A_U, lda, b_U_T, ldx, m);
+	trsv_blk('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D, ldx, m);
+	trsv_blk('U', 'T', 'U', 'A', n, A_U_D, lda, b_U_T_D, ldx, m);
 
 	//Lower:
-	trsv_blk('L', 'N', 'N', n, A_L, lda, b_L, ldx, m);
-	trsv_blk('L', 'T', 'N', n, A_L, lda, b_L_T, ldx, m);
-	trsv_blk('L', 'N', 'U', n, A_L_D, lda, b_L_D, ldx, m);
-	trsv_blk('L', 'T', 'U', n, A_L_D, lda, b_L_T_D, ldx, m);
+	trsv_blk('L', 'N', 'N', 'A', n, A_L, lda, b_L, ldx, m);
+	trsv_blk('L', 'T', 'N', 'A', n, A_L, lda, b_L_T, ldx, m);
+	trsv_blk('L', 'N', 'U', 'A', n, A_L_D, lda, b_L_D, ldx, m);
+	trsv_blk('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
 
-	/*cout<<"\nb:"<<endl;
-    for (int i=0; i<n; ++i) {
-    	for (int j=0; j<m; ++j) {
-    		cout << b_U_T_D[i*m +j] << " ";
-    	}
-    	cout << endl;
-    }*/
+	for (int i=0; i<n; ++i) {
+		for (int j=0; j<n; ++j) {
+		
+			cout << b_U_D[i*ldx+j] << " ";
+			
+		}
+		cout<<endl;
+	}
     
 	//Output results:
 	cout << "\nResults for trsv_blk:\n" << endl;
@@ -385,7 +404,7 @@ void testTRSV_BLK(int n, int m) {
 	
 }
 
-void testTRSV_PSX(int n, int m) {
+/*void testTRSV_PSX(int n, int m) {
 
 	//Build A and x, then compute b:
 	double *A_U = new double[n*n];
@@ -532,7 +551,7 @@ void testTRSV_PSX(int n, int m) {
 	delete[] b_U_T_D;
 	delete[] b_L_T_D;
 	
-}
+}*/
 
 double errCalc(int n, double *exact, double *calc, int incX) {
 
