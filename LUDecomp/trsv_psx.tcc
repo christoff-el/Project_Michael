@@ -8,19 +8,20 @@
 template <typename IndexType, typename A, typename X>
 class SolveThread{
     
-    char 		uplo, trans, diag;
+    char 		uplo, trans, diag, ordering;
     IndexType 	n, lda, ldx, m_sub;
     const A 	*a;
     X 			*x_begin;
 
 public:
-    SolveThread(char _uplo, char _trans, char _diag, IndexType _n, 
+    SolveThread(char _uplo, char _trans, char _diag, char _ordering, IndexType _n, 
     				const A *_a, IndexType _lda, 
     					X *_x_begin, IndexType _ldx, 
     						IndexType _m_sub) 
     :	uplo(_uplo),
         trans(_trans),
         diag(_diag),
+        ordering(_ordering),
         n(_n),
         a(_a),
         lda(_lda),
@@ -30,14 +31,14 @@ public:
 	{}
     
     void operator()(){        
-        trsv_blk(uplo, trans, diag, n, a, lda, x_begin, ldx, m_sub);
+        trsv_blk(uplo, trans, diag, ordering, n, a, lda, x_begin, ldx, m_sub);
     }
     
 };
 
 template <typename IndexType, typename A, typename X>
 void
-trsv_psx(char uplo, char trans, char diag, IndexType n,
+trsv_psx(char uplo, char trans, char diag, char ordering, IndexType n,
 		const A *a, IndexType lda,
 				X *x, IndexType ldx, 
 					IndexType m)
@@ -85,7 +86,8 @@ trsv_psx(char uplo, char trans, char diag, IndexType n,
 	for (int i=0; i<NUMPROC; ++i) {
 	
 		int elCount = (i < leftovers) ? (elsPerThread+1) : (elsPerThread);
-		threads[i] = std::thread(SolveThread<IndexType, A, X>(uplo, trans, diag, n, a, lda, &x[x_begin], ldx, elCount) );
+		threads[i] = std::thread(SolveThread<IndexType, A, X>
+										(uplo, trans, diag, ordering, n, a, lda, &x[x_begin], ldx, elCount) );
 		
 		x_begin += elCount;
 	

@@ -38,6 +38,13 @@ diag:
 		if diag = 'U' or 'u' then the matrix is unit triangular;
 		if diag = 'N' or 'n', then the matrix is not unit triangular.
 
+order:
+	CHARACTER*1.
+	Specifies whether the system is of the form AX=B or XA=B
+		if order = 'A' or 'a', then AX=B;
+		if order = 'X' or 'x', then XA=B;
+			(no change to transpose parameter is required).
+			
 n:
 	INTEGER. 
 	Specifies the order of the matrix A. The value of n must be at least zero.
