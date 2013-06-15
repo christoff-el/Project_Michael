@@ -14,15 +14,14 @@ scal(T *A, IndexType size, IndexType incA, SCAL &alpha);
 // Function: 	A <- A + alpha* a*b^T
 // m: 			row number
 // n: 			column number
-// incM:		increment to next row index
-// incN:		increment to next column index
+// Assumes row-major ordering
+// lda:			increment to next row index
 // ínca:		increment to next element of a
 // incb:		============//================
 template <typename IndexType, typename T, typename VEC, typename SCAL>
 void
-ger(T *A, IndexType m, IndexType n, IndexType incM, IndexType incN, 
+ger(T *A, IndexType m, IndexType n, IndexType lda, 
 	VEC *a, IndexType inca, VEC *b, IndexType incb, SCAL &alpha);
-
 
 #include "_blas.tcc"
 #endif
