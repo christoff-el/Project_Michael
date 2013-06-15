@@ -1,10 +1,12 @@
-#include "_blas.h"
 #include <iomanip>
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include "lufac.h"
-#include "gemm.h"
+
+#include "../_blas.h"
+#include "../lufac.h"
+#include "../gemm.h"
+
 using namespace std;
 
 //+++++++++++++++++++++++++++

@@ -2,9 +2,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include "lufac.h"
 #include "gemm.h"
-#include "../LUsolver/trsv_blk.h"
+#include "trsv_blk.h"
 using namespace std;
 
 //+++++++++++++++++++++++++++
@@ -66,10 +65,11 @@ int main(int argc, char** argv)
 	cout << "A=" << endl; print_matrix(A, N, N, N, 1);
 	cout << "B=" << endl; print_matrix(B, N, N, N, 1);
 	// Solver
-	trsv_blk('L', 'N', 'U', N, A, N, B, N, N);
+	trsv_blk('U', 'N', 'N', 'X', N, A, N, B, N, N);
 	cout << "Solution= " << endl; print_matrix(B, N, N, N, 1);
 #define blocksize 1
-	hpc::dgemm(N,N,N,res,L,U,blocksize);
+	hpc::dgemm(N,N,N,res,B,A,blocksize);
+	cout << "X*A= " << endl; print_matrix(res, N, N, N, 1);
 	delete[] A;
 	delete[] B;
 	delete[] res;

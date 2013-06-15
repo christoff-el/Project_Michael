@@ -1,10 +1,18 @@
 #include <iomanip>
+#include <assert.h>
 #include <iostream>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include "lufac.h"
 #include "timer.h"
 using namespace std;
+
+// Default blocksize
+#ifndef BLOCKSIZE
+#define BLOCKSIZE 4
+#endif
+
 
 //+++++++++++++++++++++++++++
 // Display functions
@@ -49,58 +57,150 @@ abs_diff(double *A, double *B, int m, int n)
 // Main
 int main (int argc, char** argv)
 {
-	if (argc!=3)
+	// Read input
+	if (argc!=4)
 	{
-		cerr << endl << "Usage: #order of quadratic matrix #print matrices (1=yes)  " << endl;
+		cerr << "Usage: #rows #columns #print matrices (1=yes)  " << endl;
 		exit(1);
 	}
-	int N = 3;//atoi(argv[1]);
-	int print = atoi(argv[2]);
-	double *A, double *B;
-	A = new double [N*N]; B = new double [N*N];
+
+	int N = atoi(argv[1]);
+	int M = atoi(argv[2]);
+	int print = atoi(argv[3]);
+	double *A, *B, *L, *U, *C;
+
+	// Check
+	assert(N>1 && M>1 && BLOCKSIZE<=N && BLOCKSIZE<=M && BLOCKSIZE>0);
+
+	// Cases: N>M, N<M, N=M
+	int ld;
+	A = new double [N*M]; B = new double [N*M];
+	if (M>N)
+	{
+		L = new double [N*N]; U = new double [N*M];
+		ld = N;
+	}
+	else
+	{
+		U = new double [M*M]; L = new double [N*M];
+		ld = M;	
+	}
+	C = new double [N*M];
+
+	/*A[0] = 1;	A[1] = 2;	A[2] = -1;	A[3] = 2;
+	A[4] = 4;	A[5] = 3;	A[6] = 1;	A[7] = 3;
+	A[8] = 2;	A[9] = 2;	A[10] = 3;	A[11] = 5; <--- simple test */
 
 	// Fill with random values
 	srand(0);
 	for (int i=0; i<N; ++i)
 	{
-		for (int j=0; j<N, ++j)
+		for (int j=0; j<M; ++j)
 		{
-			A[i*N+j] = (double)rand()/RAND_MAX;
-			B[i*N+j] = A[i*N+j];
+			A[i*M+j] = (double)rand()/RAND_MAX;
+			B[i*M+j] = A[i*M+j];
+			C[i*M+j] = A[i*M+j];
 		}
 	}
 
+
 	// Compute decompositions and measure time
-	#define blocksize 1
+
 	if (print==1)
 	{
-		cout << "A=" << endl; print_matrix(A, N, N, N, 1);
-		cout << "B=" << endl; print_matrix(B, N, N, N, 1);
+		cout << "A=" << endl; print_matrix(A, N, M, M, 1);
+		cout << "B=" << endl; print_matrix(B, N, M, M, 1);
 	}
+
+	// Unblocked
 	Timer timer;
-	double t1, t2;
+	double t1;
 	timer.start();
-	lufac(B, N, N, 1);
+	lufac(B, N, M, M);
 	timer.stop();
 	t1 = timer.elapsed();
 
-	timer.start();
-	lufac_bl(A, N, N, 1, blocksize);
-	timer.stop();
-	t2 = timer.elapsed();
-
 	if (print==1)
 	{
-		cout << "A=LU=" << endl; print_matrix(A, N, N, N, 1);
-		cout << "B=LU=" << endl; print_matrix(B, N, N, N, 1);
+		cout << "(unbl) B=L|U=" << endl; print_matrix(B, N, M, M, 1);
 	}
-	double error = abs_diff(A, B, N, N);
-	cout << setw(20) << "Error: " << setprecision(6) << error << endl;
-	cout << setw(20) << "Unblocked LU: " << setprecision(6) << t1 << " sec" << endl;
-	cout << setw(20) << "Blocked LU: " << setprecision(6) << t2 << " sec" << endl;
+
+	for (int i=0; i<N; ++i)
+	{
+		for (int j=0; j<M; ++j)
+		{
+			if (j>i)
+			{
+				if (i<M) U[i*M+j] = B[i*M+j];
+				if (j<N) L[i*ld+j] = 0.;
+			}
+			else if (j<i)
+			{
+				if (i<M) U[i*M+j] = 0.;
+				if (j<N) L[i*ld+j] = B[i*M+j];
+			}
+			else if (j==i)
+			{
+				if (i<M) U[i*M+j] = B[i*M+j];
+				if (j<N) L[i*ld+j] = 1.;	
+			}
+			B[i*M+j] = 0.;
+		}
+	}
+	dgemm(N, ld, M, L, ld, U, M, B, M);
+	double error_unbl = abs_diff(C, B, N, M);
+
+
+	// Blocked
+	double t2;
+	timer.start();
+	lufac_bl(A, N, M, M, BLOCKSIZE);
+	timer.stop();
+	t2 = timer.elapsed();
+	
+	if (print==1)
+	{
+		cout << "(bl) A=L|U=" << endl; print_matrix(A, N, M, M, 1);
+	}
+	
+	for (int i=0; i<N; ++i)
+	{
+		for (int j=0; j<M; ++j)
+		{
+			if (j>i)
+			{
+				if (i<M) U[i*M+j] = A[i*M+j];
+				if (j<N) L[i*ld+j] = 0.;
+			}
+			else if (j<i)
+			{
+				if (i<M) U[i*M+j] = 0.;
+				if (j<N) L[i*ld+j] = A[i*M+j];
+			}
+			else if (j==i)
+			{
+				if (i<M) U[i*M+j] = A[i*M+j];
+				if (j<N) L[i*ld+j] = 1.;	
+			}
+			A[i*M+j] = 0.;
+		}
+	}
+	dgemm(N, ld, M, L, ld, U, M, A, M);
+	double error_bl = abs_diff(C, A, N, M);
+
+	// Output
+	cout << endl;
+	cout << setw(20) << "Error unblocked: " << setprecision(6) << error_unbl << endl;
+	cout << setw(20) << "Error blocked: " << setprecision(6) << error_bl << endl;
+	cout << setw(20) << "Time unblocked LU: " << setprecision(6) << t1 << " sec" << endl;
+	cout << setw(20) << "Time blocked LU: " << setprecision(6) << t2 << " sec" << endl;
 	cout << setw(20) << "Scaling factor: " << setprecision(6) << t1/t2 << endl;
+	cout << endl;
 
 	delete[] A;
 	delete[] B;
+	delete[] L;
+	delete[] U;
+	delete[] C;
 	return 0;
 }
