@@ -7,7 +7,7 @@
 #include <cmath>
 
 #include "../trsv.h"
-#include "../trsv_blk.h"
+#include "../trsv_mat.h"
 #include "../trsv_psx.h"
 #include "timer.h"
 
@@ -16,7 +16,7 @@ using namespace std;
 double errCalc(int n, double *exact, double *calc, int incX);
 double errCalc2d(int n, int m, double *exact, double *calc);
 void testTRSV(int n);
-void testTRSV_BLK(int n, int m);
+void testTRSV_mat(int n, int m);
 void testTRSV_PSX(int n, int m);
 
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	}
 	
 	testTRSV(n);
-	testTRSV_BLK(n,m);
+	testTRSV_mat(n,m);
 	testTRSV_PSX(n,m);
 	
 	
@@ -241,7 +241,7 @@ void testTRSV(int n) {
 	
 }
 
-void testTRSV_BLK(int n, int m) {
+void testTRSV_mat(int n, int m) {
 
 	//Build A and x, then compute b:
 	double *A_U = new double[n*n];
@@ -382,29 +382,29 @@ void testTRSV_BLK(int n, int m) {
 	
 	//AX=B	
 	//Upper:
-	trsv_blk('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
-	trsv_blk('U', 'T', 'N', 'A', n, A_U, lda, b_U_T, ldx, m);
-	trsv_blk('U', 'N', 'U', 'A', n, A_U_D, lda, b_U_D, ldx, m);
-	trsv_blk('U', 'T', 'U', 'A', n, A_U_D, lda, b_U_T_D, ldx, m);
+	trsv_mat('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
+	trsv_mat('U', 'T', 'N', 'A', n, A_U, lda, b_U_T, ldx, m);
+	trsv_mat('U', 'N', 'U', 'A', n, A_U_D, lda, b_U_D, ldx, m);
+	trsv_mat('U', 'T', 'U', 'A', n, A_U_D, lda, b_U_T_D, ldx, m);
 
 	//Lower:
-	trsv_blk('L', 'N', 'N', 'A', n, A_L, lda, b_L, ldx, m);
-	trsv_blk('L', 'T', 'N', 'A', n, A_L, lda, b_L_T, ldx, m);
-	trsv_blk('L', 'N', 'U', 'A', n, A_L_D, lda, b_L_D, ldx, m);
-	trsv_blk('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
+	trsv_mat('L', 'N', 'N', 'A', n, A_L, lda, b_L, ldx, m);
+	trsv_mat('L', 'T', 'N', 'A', n, A_L, lda, b_L_T, ldx, m);
+	trsv_mat('L', 'N', 'U', 'A', n, A_L_D, lda, b_L_D, ldx, m);
+	trsv_mat('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
 	
 	//XA=B
 	//Upper:
-	trsv_blk('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
-	trsv_blk('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
-	trsv_blk('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
-	trsv_blk('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
+	trsv_mat('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
+	trsv_mat('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
+	trsv_mat('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
+	trsv_mat('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
 
 	//Lower:
-	trsv_blk('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
-	trsv_blk('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
-	trsv_blk('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
-	trsv_blk('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
+	trsv_mat('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
+	trsv_mat('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
+	trsv_mat('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
+	trsv_mat('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
 
 	for (int i=0; i<n; ++i) {
 		for (int j=0; j<n; ++j) {
@@ -416,7 +416,7 @@ void testTRSV_BLK(int n, int m) {
 	}
     
 	//Output results:
-	cout << "\nResults for trsv_blk:\n" << endl;
+	cout << "\nResults for trsv_mat:\n" << endl;
 	
 	double err_U = errCalc2d(n,m,x,b_U);
 	double err_U_T = errCalc2d(n,m,x,b_U_T);
@@ -620,16 +620,16 @@ void testTRSV_PSX(int n, int m) {
 	
 	//XA=B
 	//Upper:
-	trsv_blk('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
-	trsv_blk('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
-	trsv_blk('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
-	trsv_blk('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
+	trsv_mat('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
+	trsv_mat('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
+	trsv_mat('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
+	trsv_mat('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
 
 	//Lower:
-	trsv_blk('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
-	trsv_blk('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
-	trsv_blk('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
-	trsv_blk('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
+	trsv_mat('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
+	trsv_mat('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
+	trsv_mat('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
+	trsv_mat('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
 
     
 	//Output results:
@@ -682,7 +682,7 @@ void testTRSV_PSX(int n, int m) {
 	Timer timer;
 	
 	timer.start();
-	trsv_blk('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
+	trsv_mat('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
 	timer.stop();
 	cout << "\nSingle threaded calculation took: " << timer.elapsed() << endl;
 	

@@ -1,9 +1,7 @@
-#ifndef LU_DECOMP_TRSV_BLK_H
-#define LU_DECOMP_TRSV_BLK_H 1
+#ifndef LU_DECOMP_TRSV_MAT_H
+#define LU_DECOMP_TRSV_MAT_H 1
 
-#include "trsv_blk.tcc"
-
-/***** Blocked Version of trsv_mat *****/
+#include "trsv_mat.tcc"
 
 /***** Triangular Solver where b is a matrix *****
 I.e. we solve Ax(:,i) = b(:,i) where i=0,...,#of cols of b -1
@@ -86,9 +84,9 @@ ASSUMES ROW-MAJOR STORAGE
 
 template <typename IndexType, typename A, typename X>
 void
-trsv_blk(char uplo, char trans, char diag, char order, IndexType n,
+trsv_mat(char uplo, char trans, char diag, char order, IndexType n,
 		const A *a, IndexType lda,
 				X *x, IndexType ldx, 
 					IndexType m);
 
-#endif	//LU_DECOMP_TRSV_BLK_H
+#endif	//LU_DECOMP_TRSV_MAT_H

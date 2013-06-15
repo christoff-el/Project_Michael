@@ -3,7 +3,7 @@
 
 #include <thread>
 
-#include "trsv_psx.tcc"
+#include "trsv_mat.h"
 
 template <typename IndexType, typename A, typename X>
 class SolveThread{
@@ -23,15 +23,15 @@ public:
         diag(_diag),
         ordering(_ordering),
         n(_n),
-        a(_a),
         lda(_lda),
-        x_begin(_x_begin),
         ldx(_ldx),
-        m_sub(_m_sub)
+        m_sub(_m_sub),
+        a(_a),
+        x_begin(_x_begin)       
 	{}
     
     void operator()(){        
-        trsv_blk(uplo, trans, diag, ordering, n, a, lda, x_begin, ldx, m_sub);
+        trsv_mat(uplo, trans, diag, ordering, n, a, lda, x_begin, ldx, m_sub);
     }
     
 };
