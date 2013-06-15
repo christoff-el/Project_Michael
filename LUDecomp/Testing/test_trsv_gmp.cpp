@@ -8,7 +8,7 @@
 #include <gmpxx.h>
 
 #include "../trsv.h"
-#include "../trsv_mat.h"
+#include "../trsv_blk.h"
 #include "../trsv_psx.h"
 #include "timer.h"
 
@@ -17,7 +17,7 @@ using namespace std;
 mpf_class errCalc(int n, mpf_class *exact, mpf_class *calc, int incX, int prec);
 mpf_class errCalc2d(int n, int m, mpf_class *exact, mpf_class *calc, int prec);
 void testTRSV_gmp(int n, int prec);
-void testTRSV_mat_gmp(int n, int m, int prec);
+void testTRSV_blk_gmp(int n, int m, int prec);
 void testTRSV_PSX_gmp(int n, int m, int prec);
 
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
 	
 	testTRSV_gmp(n,prec);
-	testTRSV_mat_gmp(n,m,prec);
+	testTRSV_blk_gmp(n,m,prec);
 	testTRSV_PSX_gmp(n,m,prec);
 	
 	
@@ -243,7 +243,7 @@ void testTRSV_gmp(int n, int prec) {
 	
 }
 
-void testTRSV_mat_gmp(int n, int m, int prec) {
+void testTRSV_blk_gmp(int n, int m, int prec) {
 	
 	mpf_set_default_prec(prec);
 	
@@ -270,6 +270,7 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
 	mpf_class *b_L_D_X = new mpf_class[n*n];
 	mpf_class *b_U_T_D_X = new mpf_class[n*n];
 	mpf_class *b_L_T_D_X = new mpf_class[n*n];
+	mpf_class *x_X = new mpf_class[n*n];
 	
 	//Fill A, x with random numbers:
 	srand(time(NULL));
@@ -297,6 +298,12 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
         for (int j=0; j<m; ++j) {
         
         	x[i*m +j] = tmp;						//Columns of x all the same.
+        	
+        }
+        
+        for (int j=0; j<n; ++j) {
+        
+        	x_X[i*n +j] = tmp;						//Columns of x all the same.
         	
         }
         
@@ -335,7 +342,7 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
     
     for (int k=0; k<n; ++k) {
     	for (int i=0; i<n; ++i) {
-    	
+
     		b_U_X[k*n +i] = 0;
 	    	b_L_X[k*n +i] = 0;
     	
@@ -344,11 +351,11 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
     		
     		for (int j=0; j<n; ++j) {
     		
-    			b_U_X[k*n +i] += A_U[j*n +i] * x[k*n +j];
-    			b_L_X[k*n +i] += A_L[j*n +i] * x[k*n +j];
+    			b_U_X[k*n +i] += A_U[j*n +i] * x_X[k*n +j];
+    			b_L_X[k*n +i] += A_L[j*n +i] * x_X[k*n +j];
     		
-    			b_U_D_X[k*n +i] += A_U_D[j*n +i] * x[k*n +j];
-	    		b_L_D_X[k*n +i] += A_L_D[j*n +i] * x[k*n +j];
+    			b_U_D_X[k*n +i] += A_U_D[j*n +i] * x_X[k*n +j];
+	    		b_L_D_X[k*n +i] += A_L_D[j*n +i] * x_X[k*n +j];
 	    		
 	    	}
     	
@@ -367,33 +374,34 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
 
 	//AX=B	
 	//Upper:
-	trsv_mat('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
-	trsv_mat('U', 'T', 'N', 'A', n, A_U, lda, b_U_T, ldx, m);
-	trsv_mat('U', 'N', 'U', 'A', n, A_U_D, lda, b_U_D, ldx, m);
-	trsv_mat('U', 'T', 'U', 'A', n, A_U_D, lda, b_U_T_D, ldx, m);
+	trsv_blk('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
+	trsv_blk('U', 'T', 'N', 'A', n, A_U, lda, b_U_T, ldx, m);
+	trsv_blk('U', 'N', 'U', 'A', n, A_U_D, lda, b_U_D, ldx, m);
+	trsv_blk('U', 'T', 'U', 'A', n, A_U_D, lda, b_U_T_D, ldx, m);
 
 	//Lower:
-	trsv_mat('L', 'N', 'N', 'A', n, A_L, lda, b_L, ldx, m);
-	trsv_mat('L', 'T', 'N', 'A', n, A_L, lda, b_L_T, ldx, m);
-	trsv_mat('L', 'N', 'U', 'A', n, A_L_D, lda, b_L_D, ldx, m);
-	trsv_mat('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
+	trsv_blk('L', 'N', 'N', 'A', n, A_L, lda, b_L, ldx, m);
+	trsv_blk('L', 'T', 'N', 'A', n, A_L, lda, b_L_T, ldx, m);
+	trsv_blk('L', 'N', 'U', 'A', n, A_L_D, lda, b_L_D, ldx, m);
+	trsv_blk('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
 	
 	//XA=B
+	ldx=n;
 	//Upper:
-	trsv_mat('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
-	trsv_mat('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
-	trsv_mat('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
-	trsv_mat('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
+	trsv_blk('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, n);
+	trsv_blk('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, n);
+	trsv_blk('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, n);
+	trsv_blk('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, n);
 
 	//Lower:
-	trsv_mat('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
-	trsv_mat('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
-	trsv_mat('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
-	trsv_mat('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
+	trsv_blk('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, n);
+	trsv_blk('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, n);
+	trsv_blk('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, n);
+	trsv_blk('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, n);
 	
     
 	//Output results:
-	cout << "\nResults for trsv_mat:\n" << endl;
+	cout << "\nResults for trsv_blk:\n" << endl;
 	
 	mpf_class err_U = errCalc2d(n,m,x,b_U,prec);
 	mpf_class err_U_T = errCalc2d(n,m,x,b_U_T,prec);
@@ -405,15 +413,15 @@ void testTRSV_mat_gmp(int n, int m, int prec) {
 	mpf_class err_L_D = errCalc2d(n,m,x,b_L_D,prec);
 	mpf_class err_L_T_D = errCalc2d(n,m,x,b_L_T_D,prec);
 	
-	mpf_class err_U_X = errCalc2d(n,m,x,b_U_X,prec);
-	mpf_class err_U_T_X = errCalc2d(n,m,x,b_U_T_X,prec);
-	mpf_class err_U_D_X = errCalc2d(n,m,x,b_U_D_X,prec);
-	mpf_class err_U_T_D_X = errCalc2d(n,m,x,b_U_T_D_X,prec);
+	mpf_class err_U_X = errCalc2d(n,n,x_X,b_U_X,prec);
+	mpf_class err_U_T_X = errCalc2d(n,n,x_X,b_U_T_X,prec);
+	mpf_class err_U_D_X = errCalc2d(n,n,x_X,b_U_D_X,prec);
+	mpf_class err_U_T_D_X = errCalc2d(n,n,x_X,b_U_T_D_X,prec);
 	
-	mpf_class err_L_X = errCalc2d(n,m,x,b_L_X,prec);
-	mpf_class err_L_T_X = errCalc2d(n,m,x,b_L_T_X,prec);
-	mpf_class err_L_D_X = errCalc2d(n,m,x,b_L_D_X,prec);
-	mpf_class err_L_T_D_X = errCalc2d(n,m,x,b_L_T_D_X,prec);
+	mpf_class err_L_X = errCalc2d(n,n,x_X,b_L_X,prec);
+	mpf_class err_L_T_X = errCalc2d(n,n,x_X,b_L_T_X,prec);
+	mpf_class err_L_D_X = errCalc2d(n,n,x_X,b_L_D_X,prec);
+	mpf_class err_L_T_D_X = errCalc2d(n,n,x_X,b_L_T_D_X,prec);
 	
 	cout << "AX=B:" << endl;
 	cout << fixed << setprecision(4) << "Upper: " << err_U << "\t\t\t ----> " << ((err_U<PREC)?"PASS":"FAIL") << endl;
@@ -490,6 +498,7 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
 	mpf_class *b_L_D_X = new mpf_class[n*n];
 	mpf_class *b_U_T_D_X = new mpf_class[n*n];
 	mpf_class *b_L_T_D_X = new mpf_class[n*n];
+	mpf_class *x_X = new mpf_class[n*n];
 	
 	//Fill A, x with random numbers:
 	srand(time(NULL));
@@ -520,8 +529,14 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
         	
         }
         
+        for (int j=0; j<n; ++j) {
+        
+        	x_X[i*n +j] = tmp;						//Columns of x all the same.
+        	
+        }        
+        
     }
-    
+
     //b = Ax
     //cout << "b:" << endl;
     for (int k=0; k<m; ++k) {
@@ -563,11 +578,11 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
     		
     		for (int j=0; j<n; ++j) {
     		
-    			b_U_X[k*n +i] += A_U[j*n +i] * x[k*n +j];
-    			b_L_X[k*n +i] += A_L[j*n +i] * x[k*n +j];
+    			b_U_X[k*n +i] += A_U[j*n +i] * x_X[k*n +j];
+    			b_L_X[k*n +i] += A_L[j*n +i] * x_X[k*n +j];
     		
-    			b_U_D_X[k*n +i] += A_U_D[j*n +i] * x[k*n +j];
-	    		b_L_D_X[k*n +i] += A_L_D[j*n +i] * x[k*n +j];
+    			b_U_D_X[k*n +i] += A_U_D[j*n +i] * x_X[k*n +j];
+	    		b_L_D_X[k*n +i] += A_L_D[j*n +i] * x_X[k*n +j];
 	    		
 	    	}
     	
@@ -598,17 +613,18 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
 	trsv_psx('L', 'T', 'U', 'A', n, A_L_D, lda, b_L_T_D, ldx, m);
 	
 	//XA=B
+	ldx=n;
 	//Upper:
-	trsv_mat('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, m);
-	trsv_mat('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, m);
-	trsv_mat('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, m);
-	trsv_mat('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, m);
+	trsv_psx('U', 'N', 'N', 'X', n, A_U, lda, b_U_X, ldx, n);
+	trsv_psx('U', 'T', 'N', 'X', n, A_U, lda, b_U_T_X, ldx, n);
+	trsv_psx('U', 'N', 'U', 'X', n, A_U_D, lda, b_U_D_X, ldx, n);
+	trsv_psx('U', 'T', 'U', 'X', n, A_U_D, lda, b_U_T_D_X, ldx, n);
 
 	//Lower:
-	trsv_mat('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, m);
-	trsv_mat('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, m);
-	trsv_mat('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, m);
-	trsv_mat('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, m);
+	trsv_psx('L', 'N', 'N', 'X', n, A_L, lda, b_L_X, ldx, n);
+	trsv_psx('L', 'T', 'N', 'X', n, A_L, lda, b_L_T_X, ldx, n);
+	trsv_psx('L', 'N', 'U', 'X', n, A_L_D, lda, b_L_D_X, ldx, n);
+	trsv_psx('L', 'T', 'U', 'X', n, A_L_D, lda, b_L_T_D_X, ldx, n);
 
     //Output results:
 	cout << "\nResults for trsv_psx:\n" << endl;
@@ -623,15 +639,15 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
 	mpf_class err_L_D = errCalc2d(n,m,x,b_L_D,prec);
 	mpf_class err_L_T_D = errCalc2d(n,m,x,b_L_T_D,prec);
 	
-	mpf_class err_U_X = errCalc2d(n,m,x,b_U_X,prec);
-	mpf_class err_U_T_X = errCalc2d(n,m,x,b_U_T_X,prec);
-	mpf_class err_U_D_X = errCalc2d(n,m,x,b_U_D_X,prec);
-	mpf_class err_U_T_D_X = errCalc2d(n,m,x,b_U_T_D_X,prec);
+	mpf_class err_U_X = errCalc2d(n,n,x_X,b_U_X,prec);
+	mpf_class err_U_T_X = errCalc2d(n,n,x_X,b_U_T_X,prec);
+	mpf_class err_U_D_X = errCalc2d(n,n,x_X,b_U_D_X,prec);
+	mpf_class err_U_T_D_X = errCalc2d(n,n,x_X,b_U_T_D_X,prec);
 	
-	mpf_class err_L_X = errCalc2d(n,m,x,b_L_X,prec);
-	mpf_class err_L_T_X = errCalc2d(n,m,x,b_L_T_X,prec);
-	mpf_class err_L_D_X = errCalc2d(n,m,x,b_L_D_X,prec);
-	mpf_class err_L_T_D_X = errCalc2d(n,m,x,b_L_T_D_X,prec);
+	mpf_class err_L_X = errCalc2d(n,n,x_X,b_L_X,prec);
+	mpf_class err_L_T_X = errCalc2d(n,n,x_X,b_L_T_X,prec);
+	mpf_class err_L_D_X = errCalc2d(n,n,x_X,b_L_D_X,prec);
+	mpf_class err_L_T_D_X = errCalc2d(n,n,x_X,b_L_T_D_X,prec);
 	
 	cout << "AX=B:" << endl;
 	cout << fixed << setprecision(4) << "Upper: " << err_U << "\t\t\t ----> " << ((err_U<PREC)?"PASS":"FAIL") << endl;
@@ -657,9 +673,9 @@ void testTRSV_PSX_gmp(int n, int m, int prec) {
 
 	//Timing tests:
 	Timer timer;
-	
+	ldx=m;
 	timer.start();
-	trsv_mat('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
+	trsv_blk('U', 'N', 'N', 'A', n, A_U, lda, b_U, ldx, m);
 	timer.stop();
 	cout << "\nSingle threaded calculation took: " << timer.elapsed() << endl;
 	

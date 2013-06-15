@@ -86,7 +86,7 @@ ASSUMES ROW-MAJOR STORAGE
 
 template <typename IndexType, typename A, typename X>
 void
-trsv_blk(char uplo, char trans, char diag, char order, IndexType n,
+trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 		const A *a, IndexType lda,
 				X *x, IndexType ldx, 
 					IndexType m);

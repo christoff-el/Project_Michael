@@ -3,7 +3,7 @@
 
 #include <thread>
 
-#include "trsv_mat.h"
+#include "trsv_blk.h"
 
 template <typename IndexType, typename A, typename X>
 class SolveThread{
@@ -31,7 +31,7 @@ public:
 	{}
     
     void operator()(){        
-        trsv_mat(uplo, trans, diag, ordering, n, a, lda, x_begin, ldx, m_sub);
+        trsv_blk(uplo, trans, diag, ordering, n, a, lda, x_begin, ldx, m_sub);
     }
     
 };
@@ -86,10 +86,21 @@ trsv_psx(char uplo, char trans, char diag, char ordering, IndexType n,
 	for (int i=0; i<NUMPROC; ++i) {
 	
 		int elCount = (i < leftovers) ? (elsPerThread+1) : (elsPerThread);
+		
 		threads[i] = std::thread(SolveThread<IndexType, A, X>
 										(uplo, trans, diag, ordering, n, a, lda, &x[x_begin], ldx, elCount) );
 		
-		x_begin += elCount;
+		//If XA=B, then we must split in horizontal bands rather than vertical:
+		if (ordering == 'X' || ordering == 'x') {
+		
+			x_begin += elCount * ldx;
+		
+		}
+		else {	//Normal for AX=B
+		
+			x_begin += elCount;
+			
+		}
 	
 	}
 	
