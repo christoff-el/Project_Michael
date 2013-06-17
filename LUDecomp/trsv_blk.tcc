@@ -11,17 +11,43 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 					IndexType m)
 {
 
-	/*#ifndef CACHESIZE
+	#ifndef CACHESIZE
 	#define CACHESIZE 32*1024
 	#endif
 	
+	//Square blocksize such that A and B blocks fit in L1:
 	int blkSize = sqrt((CACHESIZE / sizeof(double)) / 2);
 	
-	int blkCount_i = n / blkSize;
-	int blkCount_j = m / blkSize;
+	//Blocks in n and m dimensions:
+	int blkCount_n = n / blkSize;
+	int blkCount_m = m / blkSize;
 	
-	int LO_i = n - blkCount_i * blkSize;
-	int LO_j = m - blkCount_j * blkSize;
+	//Leftovers in n and m dimensions:
+	int LO_n = n - blkCount_i * blkSize;
+	int LO_m = m - blkCount_j * blkSize;
+	
+	
+	for (int I=0; I<blkCount_n; ++I) {
+	
+		//Back-solve the triangular block on the diagonal:
+		
+	
+		for (int J=0; J<I; J++) {
+			
+			
+			
+		}
+	
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	for (int I=blkCount_i-1; I>=0; --I) {
 	
@@ -34,7 +60,7 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 			
 	
 		}
-	}*/
+	}
 
 
 	//to keep everything working as before:

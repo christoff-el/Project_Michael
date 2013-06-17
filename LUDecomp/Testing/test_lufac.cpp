@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include "lufac.h"
+#include "../lufac.h"
 #include "timer.h"
 using namespace std;
 

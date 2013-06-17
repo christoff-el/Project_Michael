@@ -2,8 +2,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include "gemm.h"
-#include "trsv_blk.h"
+#include "../gemm.h"
+#include "../trsv_blk.h"
 using namespace std;
 
 //+++++++++++++++++++++++++++
