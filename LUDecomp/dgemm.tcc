@@ -53,7 +53,7 @@ dgemmbl2(int arow, int acol, int bcol, double *A, double *B, double *C, int bsiz
 
 
 void 
-dgemm_minus(int arow, int acol, int bcol, double *A, int astep, double *B, int bstep, double *C, int cstep){ 
+dgemm_minus(int arow, int acol, int bcol, const double *A, int astep, double *B, int bstep, double *C, int cstep){ 
   for(int i=0; i<arow; ++i)
      for(int j=0; j<bcol; ++j)
         for(int l=0; l<acol; ++l)
@@ -82,4 +82,4 @@ dgemmb_minus_l1(int arow, int acol, int bcol, double *A, int alength, double *B,
 }
 
 
-#endif
+#endif	//DGEMM_TCC

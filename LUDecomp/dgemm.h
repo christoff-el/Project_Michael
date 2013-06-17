@@ -1,6 +1,8 @@
 #ifndef DGEMM_H
 #define DGEMM_H 1
 
+#include "dgemm.tcc"
+
 // Description:
 // 					arow  - rows number of matrix A
 // 					acol  - columns number of matrix A
@@ -29,7 +31,7 @@ dgemmbl2(int arow, int acol, int bcol, double *A, double *B, double *C, int bsiz
    
 // C = C - A*B     without block
 void 
-dgemm_minus(int arow, int acol, int bcol, double *A, int astep, double *B, int bstep, double *C, int cstep);
+dgemm_minus(int arow, int acol, int bcol, const double *A, int astep, double *B, int bstep, double *C, int cstep);
 
 
 
@@ -38,4 +40,4 @@ void
 dgemmb_minus_l1(int arow, int acol, int bcol, double *A, int alength, double *B, int  blength, double *C, int bsize);
 
 
-#endif
+#endif	//DGEMM_H
