@@ -51,9 +51,9 @@ dgemmbl2(int arow, int acol, int bcol, double *A, double *B, double *C, int bsiz
       }
 }
 
-
+template <typename AA, typename BB, typename CC>
 void 
-dgemm_minus(int arow, int acol, int bcol, const double *A, int astep, double *B, int bstep, double *C, int cstep){ 
+dgemm_minus(int arow, int acol, int bcol, const AA *A, int astep, BB *B, int bstep, CC *C, int cstep){ 
   for(int i=0; i<arow; ++i)
      for(int j=0; j<bcol; ++j)
         for(int l=0; l<acol; ++l)
