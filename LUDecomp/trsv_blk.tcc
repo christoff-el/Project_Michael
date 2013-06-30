@@ -18,7 +18,7 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 	#endif
 	
 	//Square blocksize such that A, B and C blocks fit in L1:
-	int blkSize = 16;//sqrt((CACHESIZE / sizeof(double)) / 3);
+	int blkSize = 41;//sqrt((CACHESIZE / sizeof(double)) / 3);
 	int blkSize2 = 16;//sqrt((CACHESIZE / sizeof(A)) / 3);
 	
 	
@@ -109,15 +109,19 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 				//1. Main blocking bit:
 		
 				//For each block in the m dimension..
-				for (int K=0; K<blkCount_m; ++K) {	
+				for (int K=0, inxX2=ldx*(I-1)*blkSize; K<blkCount_m; ++K, inxX2+=blkSize) {	
 		
 					//1. a. For each full block that needs updating with dgemm.. 
-					for (int J=0; J<I-1; ++J) {
+					for (int J=0, inxA=lda*(I-1)*blkSize, inxX1=K*blkSize; 
+												J<I-1; ++J, 
+														inxA+=blkSize, inxX1+=ldx*blkSize) {
 			
-						dgemm_minus(blkSize, blkSize, blkSize, 
+						/*dgemm_minus(blkSize, blkSize, blkSize, 
 										&a[lda*(I-1)*blkSize + J*blkSize], lda,
 										&x[ldx*J*blkSize + K*blkSize], ldx,
-										&x[ldx*(I-1)*blkSize + K*blkSize], ldx);
+										&x[ldx*(I-1)*blkSize + K*blkSize], ldx);*/
+										
+						gemmMainMinus(blkSize, &a[inxA], lda, &x[inxX1], ldx, &x[inxX2], ldx, blkSize2);
 			
 					}
 		
