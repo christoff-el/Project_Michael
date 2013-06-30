@@ -60,9 +60,9 @@ dgemm_minus(int arow, int acol, int bcol, const AA *A, int astep, BB *B, int bst
 	   C[i*cstep+j]=C[i*cstep+j]-A[i*astep+l]*B[l*bstep+j];
 } 
 
-
+template <typename AA, typename BB, typename CC>
 void
-dgemmb_minus_l1(int arow, int acol, int bcol, double *A, int alength, double *B, int  blength, double *C, int bsize)
+dgemmb_minus_l1(int arow, int acol, int bcol, AA *A, int alength, BB *B, int  blength, CC *C, int bsize)
 {
  int arowbl=arow / bsize + std::min(arow % bsize, 1);
   int acolbl=acol / bsize + std::min(acol % bsize, 1);

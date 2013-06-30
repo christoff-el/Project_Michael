@@ -37,6 +37,7 @@ dgemm_minus(int arow, int acol, int bcol, const AA *A, int astep, BB *B, int bst
 
 
 //Blocked dgemm_minus, taking advantage of L1;
+template <typename AA, typename BB, typename CC>
 void
 dgemmb_minus_l1(int arow, int acol, int bcol, double *A, int alength, double *B, int  blength, double *C, int bsize);
 

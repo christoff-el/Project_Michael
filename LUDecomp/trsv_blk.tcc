@@ -3,6 +3,7 @@
 
 #include "trsv_mat.h"
 #include "dgemm.h"
+#include "./GEMMcache/gemmMainMinus.h"
 
 template <typename IndexType, typename A, typename X>
 void
@@ -13,11 +14,12 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 {
 
 	#ifndef CACHESIZE
-	#define CACHESIZE 32*1024
+	#define CACHESIZE 32*1000
 	#endif
 	
-	//Square blocksize such that A, B and tmp blocks fit in L1:
-	int blkSize = sqrt((CACHESIZE / sizeof(double)) / 3);
+	//Square blocksize such that A, B and C blocks fit in L1:
+	int blkSize = 16;//sqrt((CACHESIZE / sizeof(double)) / 3);
+	int blkSize2 = 16;//sqrt((CACHESIZE / sizeof(A)) / 3);
 	
 	
 	//Blocks in n and m dimensions:
@@ -42,16 +44,24 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 				//1. Main blocking bit:
 		
 				//For each block in the m dimension..
-				for (int K=0; K<blkCount_m; ++K) {	
+				for (int K=0, inxX2=start_x+ldx*(I-1)*blkSize; K<blkCount_m; ++K, inxX2+=blkSize) {	
 		
 					//1. a. For each full block that needs updating with dgemm.. 
-					for (int J=I; J<blkCount_n; ++J) {
-			
-						dgemm_minus(blkSize, blkSize, blkSize, 
-										&a[start_a + lda*(I-1)*blkSize + J*blkSize], lda,
-										&x[start_x + ldx*J*blkSize + K*blkSize], ldx,
-										&x[start_x + ldx*(I-1)*blkSize + K*blkSize], ldx);
-			
+					for (int J=I, inxA=start_a+lda*(I-1)+I*blkSize,
+									inxX1=start_x+(ldx*I+K)*blkSize; 
+															J<blkCount_n; 
+																			++J, inxA+=blkSize,
+																					inxX1+=ldx*blkSize) {
+						
+						/*dgemmb_minus_l1(blkSize, blkSize, blkSize, 
+										&a[inxA], lda,
+										&x[inxX1], ldx,
+										&x[inxX2], blkSize2);*/
+										
+						
+						gemmMainMinus(blkSize, &a[inxA], lda, &x[inxX1], ldx, &x[inxX2], ldx, blkSize2);
+						
+						
 					}
 		
 					//1. b. Back-solve the triangular block on the diagonal.
@@ -155,23 +165,23 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 			IndexType start_a = LO_n*lda + LO_n;
 			IndexType start_x = LO_n;
 			
-			std::cout<<blkSize<<" "<<start_a<<" "<<start_x<<" "<<std::endl;
+			//std::cout<<blkSize<<" "<<start_a<<" "<<start_x<<" "<<std::endl;
 			
 			for (int i=0; i<n; ++i) {
 				for (int j=0; j<n; ++j) {
-					std::cout<<a[lda*i+j]<<" ";
+					//std::cout<<a[lda*i+j]<<" ";
 				}
-				std::cout<<std::endl;
+				//std::cout<<std::endl;
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 			
 			for (int i=0; i<m; ++i) {
 				for (int j=0; j<n; ++j) {
-					std::cout<<x[ldx*i+j]<<" ";
+					//std::cout<<x[ldx*i+j]<<" ";
 				}
-				std::cout<<std::endl;
+				//std::cout<<std::endl;
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 			
 	
 			//For each block col of A:
@@ -185,8 +195,8 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 					//1. a. For each full block that needs updating with dgemm.. 
 					for (int J=0; J<I-1; ++J) {
 			
-						std::cout<< "I=" << I << " K=" << K << " J=" << J << std::endl;
-						std::cout<< std::endl;
+						//std::cout<< "I=" << I << " K=" << K << " J=" << J << std::endl;
+						//std::cout<< std::endl;
 						dgemm_minus(blkSize, blkSize, blkSize, 
 										&a[start_a + lda*J*blkSize + (I-1)*blkSize], lda,
 										&x[start_x + ldx*J*blkSize + K*blkSize], ldx,
@@ -228,11 +238,11 @@ trsv_blk(char uplo, char trans, char diag, char ordering, IndexType n,
 			
 			for (int i=0; i<m; ++i) {
 				for (int j=0; j<n; ++j) {
-					std::cout<<x[ldx*i+j]<<" ";
+					//std::cout<<x[ldx*i+j]<<" ";
 				}
-				std::cout<<std::endl;
+				//std::cout<<std::endl;
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 	
 		}
 	

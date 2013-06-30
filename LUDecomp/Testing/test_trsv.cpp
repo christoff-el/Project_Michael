@@ -1,6 +1,6 @@
 #define PREC 1e-5
 #define NUMPROC 2
-#define CACHESIZE 4000
+#define CACHESIZE 32000
 
 #include <iostream>
 #include <iomanip>
